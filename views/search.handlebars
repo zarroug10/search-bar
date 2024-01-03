@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Page</title>
+</head>
+<body>
+    <h1>Search</h1>
+
+    <form action="/search" method="GET">
+        <input type="text" name="q" placeholder="Search...">
+        <button type="submit">Search</button>
+    </form>
+
+    <h1>Search Results</h1>
+
+    <div id="search-results">
+        {{#each searchResults}}
+        <div class="search-result">
+            <h3>{{title}}</h3>
+            <img src="{{image}}" alt="Product Image">
+            <p>Price: {{price}}</p>
+        </div>
+        {{/each}}
+    </div>
+</body>
+</html>

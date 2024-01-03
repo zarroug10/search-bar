@@ -1,0 +1,59 @@
+const puppeteer = require('puppeteer');
+
+app.get('/search', async (req, res) => {
+    // Extract search query from query parameters
+    const { query } = req.query;
+  
+    // Launch a new browser instance
+    const browser = await puppeteer.launch();
+  
+    try {
+      // Navigate to Amazon website
+      const page = await browser.newPage();
+      await page.goto('https://www.amazon.com/');
+  
+      // Enter search query and submit form
+      await page.type('#twotabsearchtextbox', query);
+      await page.click('.nav-search-submit input[type="submit"]');
+  
+      // Wait for search results to load
+      await page.waitForSelector('.s-result-item');
+  
+      // Retrieve data from search results
+      const results = await page.evaluate(() => {
+        const items = document.querySelectorAll('.s-result-item');
+        const data = [];
+  
+        items.forEach((item) => {
+          const titleElement = item.querySelector('.a-link-normal .a-text-normal');
+          const imageElement = item.querySelector('.s-image');
+          const priceElement = item.querySelector('.a-price .a-offscreen');
+          const linkElement = item.querySelector('.a-link-normal');
+  
+          if (titleElement && imageElement && priceElement && linkElement) {
+            const title = titleElement.innerText.trim();
+            const image = imageElement.src;
+            const price = priceElement.innerText.trim();
+            const link = linkElement.href;
+  
+            data.push({ title, image, price, link });
+          }
+        });
+  
+        return data;
+      });
+  
+      // Return retrieved data in JSON format
+      res.json(results);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Error retrieving search results');
+    } finally {
+      // Close the browser instance
+      await browser.close();
+    }
+  });
+  
+  app.listen(3000, () => {
+    console.log('Server started on port 3000');
+  });
